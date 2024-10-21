@@ -14,3 +14,6 @@ terraform {
     }
   }
 }
+
+provider "snowflake" {
+}
