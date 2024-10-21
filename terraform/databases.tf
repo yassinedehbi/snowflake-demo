@@ -16,7 +16,7 @@ resource "snowflake_grant_privileges_to_account_role" "database_grant" {
 
 resource "snowflake_schema" "staging" {
   provider            = snowflake.sys_admin
-  database            = snowflake_database.db.name
+  database            = snowflake_database.dev_db.name
   name                = "STAGING"
   with_managed_access = false
 }
