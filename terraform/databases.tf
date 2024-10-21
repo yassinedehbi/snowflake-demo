@@ -81,6 +81,7 @@ resource "snowflake_grant_privileges_to_account_role" "schema_grant3" {
 }
 
 resource "snowflake_grant_privileges_to_account_role" "tables_grant" {
+  provider          = snowflake.security_admin
   privileges        = ["SELECT", "INSERT"]
   account_role_name = snowflake_role.dev_role.name
   on_schema_object {
