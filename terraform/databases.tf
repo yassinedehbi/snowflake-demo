@@ -82,7 +82,7 @@ resource "snowflake_grant_privileges_to_account_role" "schema_grant3" {
 
 resource "snowflake_grant_privileges_to_account_role" "tables_grant" {
   privileges        = ["SELECT", "INSERT"]
-  account_role_name = snowflake_account_role.dev_role.name
+  account_role_name = snowflake_role.dev_role.name
   on_schema_object {
     future {
       object_type_plural = "TABLES"
