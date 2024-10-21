@@ -6,6 +6,10 @@ on:
       - main
   pull_request:
 
+permissions:
+  issues: write
+  pull-requests: write
+  
 jobs:
   snowflake-terraform-demo:
     name: "Snowflake Terraform Demo Job"
@@ -30,9 +34,9 @@ jobs:
         id: init
         run: terraform init
 
-    #   - name: Terraform Validate
-    #     id: validate
-    #     run: terraform validate -no-color
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
 
       - name: Terraform Plan
         id: plan
