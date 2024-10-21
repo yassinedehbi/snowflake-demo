@@ -4,7 +4,6 @@ provider "snowflake" {
 }
 
 provider "snowflake" {
-    alias = "sys_admin"
-    role = "SYSADMIN"
+  alias = "sys_admin"
+  role  = "SYSADMIN"
 }
-

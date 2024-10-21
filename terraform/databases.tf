@@ -1,8 +1,7 @@
-
 resource "snowflake_database" "dev_db" {
   provider = snowflake.sys_admin
-  name    = "DEV_DB"
-  comment = "Main dev database"
+  name     = "DEV_DB"
+  comment  = "Main dev database"
 }
 
 resource "snowflake_grant_privileges_to_account_role" "database_grant" {
@@ -16,9 +15,9 @@ resource "snowflake_grant_privileges_to_account_role" "database_grant" {
 }
 
 resource "snowflake_schema" "staging" {
-  provider = snowflake.sys_admin
-  database   = snowflake_database.db.name
-  name       = "STAGING"
+  provider            = snowflake.sys_admin
+  database            = snowflake_database.db.name
+  name                = "STAGING"
   with_managed_access = false
 }
 
