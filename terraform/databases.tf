@@ -30,3 +30,63 @@ resource "snowflake_grant_privileges_to_account_role" "schema_grant" {
   }
 }
 
+
+resource "snowflake_schema" "raw_dtv" {
+  provider            = snowflake.sys_admin
+  database            = snowflake_database.dev_db.name
+  name                = "RAW_DTV"
+  with_managed_access = false
+}
+
+resource "snowflake_grant_privileges_to_account_role" "schema_grant1" {
+  provider          = snowflake.security_admin
+  privileges        = ["USAGE"]
+  account_role_name = snowflake_role.dev_role.name
+  on_schema {
+    schema_name = "\"${snowflake_database.dev_db.name}\".\"${snowflake_schema.raw_dtv.name}\""
+  }
+}
+
+
+resource "snowflake_schema" "business_dtv" {
+  provider            = snowflake.sys_admin
+  database            = snowflake_database.dev_db.name
+  name                = "BUSINESS_DTV"
+  with_managed_access = false
+}
+
+resource "snowflake_grant_privileges_to_account_role" "schema_grant2" {
+  provider          = snowflake.security_admin
+  privileges        = ["USAGE"]
+  account_role_name = snowflake_role.dev_role.name
+  on_schema {
+    schema_name = "\"${snowflake_database.dev_db.name}\".\"${snowflake_schema.business_dtv.name}\""
+  }
+}
+
+resource "snowflake_schema" "info_delivery" {
+  provider            = snowflake.sys_admin
+  database            = snowflake_database.dev_db.name
+  name                = "INFO_DELIVERY"
+  with_managed_access = false
+}
+
+resource "snowflake_grant_privileges_to_account_role" "schema_grant3" {
+  provider          = snowflake.security_admin
+  privileges        = ["USAGE"]
+  account_role_name = snowflake_role.dev_role.name
+  on_schema {
+    schema_name = "\"${snowflake_database.dev_db.name}\".\"${snowflake_schema.info_delivery.name}\""
+  }
+}
+
+resource "snowflake_grant_privileges_to_account_role" "tables_grant" {
+  privileges        = ["SELECT", "INSERT"]
+  account_role_name = snowflake_role.dev_role.name
+  on_schema_object {
+    future {
+      object_type_plural = "TABLES"
+      in_database        = snowflake_database.dev_db.name
+    }
+  }
+}
