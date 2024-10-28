@@ -99,10 +99,15 @@ jobs:
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
+      
+      - name: set var file
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: cp ../vars/test.auto.tfvars var.auto.tfvars
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -var-file ../vars/test.auto.tfvars -auto-approve
+        run: terraform apply -auto-approve
+      
 
      
 
