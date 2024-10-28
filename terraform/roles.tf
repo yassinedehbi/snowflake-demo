@@ -1,10 +1,10 @@
-resource "snowflake_role" "dev_role" {
+resource "snowflake_role" "role" {
   provider = snowflake.security_admin
-  name     = "DEV_ROLE"
+  name     = "${var.environment}_ROLE"
 }
 
 resource "snowflake_grant_account_role" "grants" {
   provider  = snowflake.security_admin
-  role_name = snowflake_role.dev_role.name
+  role_name = snowflake_role.role.name
   user_name = "VISEO"
 }
