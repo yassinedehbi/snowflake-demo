@@ -1,2 +1,2 @@
-environment = "PROD"
+environment    = "PROD"
 warehouse_size = "small"
