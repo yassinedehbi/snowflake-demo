@@ -41,6 +41,14 @@ jobs:
         id: init
         run: terraform init
 
+      - name: Set Terraform workspace Test
+        if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
+        run: terraform workspace select test 
+
+      - name: Set Terraform env
+        if: github.event_name == 'workflow_dispatch'
+        run: terraform workspace select ${{ github.event.inputs.ENVIRONMENT }}
+
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
