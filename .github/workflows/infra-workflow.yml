@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       ENVIRONMENT:
-        description: 'Environment to deploy to (DEV, TEST, PROD !! only)'
+        description: 'Environment to deploy to (DEV, TEST, PROD !! only) (lower case)'
         required: false
         default: "PROD"  # Default for manual runs without quotes
 
@@ -61,9 +61,9 @@ jobs:
         run: terraform plan -no-color
         continue-on-error: true
 
-      - name: Terraform PROD Plan
+      - name: Terraform Custom Plan
         id: prod_plan
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.ENVIRONMENT == 'PROD'
+        if: github.event_name == 'workflow_dispatch'
         run: terraform plan -no-color
         continue-on-error: true
 
@@ -106,5 +106,5 @@ jobs:
      
 
       - name: Set environment for workflow_dispatch
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.ENVIRONMENT == 'PROD'
+        if: github.event_name == 'workflow_dispatch'
         run: terraform apply -auto-approve
