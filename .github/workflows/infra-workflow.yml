@@ -45,10 +45,26 @@ jobs:
         id: validate
         run: terraform validate -no-color
 
-      - name: Terraform Plan
-        id: plan
+      - name: set test vars 
+        id: testvar
         if: github.event_name == 'pull_request'
-        run: terraform plan -var-file "test.auto.tfvars" -no-color
+        run: cp ../vars/test.auto.tfvars var.auto.tfvars
+
+      - name: set vars 
+        id: prodvar
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.ENVIRONMENT == 'PROD'
+        run: cp ../vars/prod.auto.tfvars var.auto.tfvars
+
+      - name: Terraform TEST Plan
+        id: testplan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color
+        continue-on-error: true
+
+      - name: Terraform TEST Plan
+        id: prodplan
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.ENVIRONMENT == 'PROD'
+        run: terraform plan -no-color
         continue-on-error: true
 
       - uses: actions/github-script@0.9.0
@@ -86,10 +102,10 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -var-file="test.auto.tfvars" -auto-approve
+        run: terraform apply -auto-approve
 
      
 
       - name: Set environment for workflow_dispatch
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.ENVIRONMENT == 'PROD'
-        run: terraform apply -var-file="prod.auto.tfvars" -auto-approve
+        run: terraform apply -auto-approve
