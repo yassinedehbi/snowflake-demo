@@ -46,23 +46,23 @@ jobs:
         run: terraform validate -no-color
 
       - name: set test vars 
-        id: testvar
+        id: test_var
         if: github.event_name == 'pull_request'
         run: cp ../vars/test.auto.tfvars var.auto.tfvars
 
       - name: set vars 
-        id: prodvar
+        id: prod_var
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.ENVIRONMENT == 'PROD'
         run: cp ../vars/prod.auto.tfvars var.auto.tfvars
 
       - name: Terraform TEST Plan
-        id: testplan
+        id: test_plan
         if: github.event_name == 'pull_request'
         run: terraform plan -no-color
         continue-on-error: true
 
-      - name: Terraform TEST Plan
-        id: prodplan
+      - name: Terraform PROD Plan
+        id: prod_plan
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.ENVIRONMENT == 'PROD'
         run: terraform plan -no-color
         continue-on-error: true
@@ -77,7 +77,7 @@ jobs:
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.test_plan.outcome }}\`
             
             <details><summary>Show Plan</summary>
             
