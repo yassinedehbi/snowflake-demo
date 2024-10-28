@@ -5,6 +5,13 @@ on:
     branches:
       - main
   pull_request:
+  
+  workflow_dispatch:
+    inputs:
+      ENVIRONMENT:
+        description: 'Environment to deploy to (e.g., DEV, PROD)'
+        required: false
+        default: "PROD"  # Default for manual runs without quotes
 
 permissions:
   issues: write
@@ -79,4 +86,10 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve
+        run: terraform apply -var-file="test.tfvars" -auto-approve
+
+     
+
+      - name: Set environment for workflow_dispatch
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.ENVIRONMENT == 'PROD'
+        run: terraform apply -var-file="prod.tfvars" -auto-approve
