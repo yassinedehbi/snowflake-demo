@@ -11,6 +11,7 @@ terraform {
 
     workspaces {
       prefix = "snowflake-demo-"
+
     }
   }
 }
