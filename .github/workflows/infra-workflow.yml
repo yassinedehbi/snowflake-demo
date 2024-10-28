@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       ENVIRONMENT:
-        description: 'Environment to deploy to (e.g., DEV, PROD)'
+        description: 'Environment to deploy to (DEV, TEST, PROD !! only)'
         required: false
         default: "PROD"  # Default for manual runs without quotes
 
@@ -47,22 +47,22 @@ jobs:
 
       - name: set test vars 
         id: testvar
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
         run: cp ../vars/test.auto.tfvars var.auto.tfvars
 
-      - name: set vars 
-        id: prodvar
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.ENVIRONMENT == 'PROD'
-        run: cp ../vars/prod.auto.tfvars var.auto.tfvars
+      - name: set vars (manual) 
+        id: customvar
+        if: github.event_name == 'workflow_dispatch'
+        run: cp ../vars/${{ toLower(github.event.inputs.ENVIRONMENT) }}.auto.tfvars var.auto.tfvars
 
       - name: Terraform TEST Plan
-        id: testplan
+        id: test_plan
         if: github.event_name == 'pull_request'
         run: terraform plan -no-color
         continue-on-error: true
 
       - name: Terraform PROD Plan
-        id: prodplan
+        id: prod_plan
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.ENVIRONMENT == 'PROD'
         run: terraform plan -no-color
         continue-on-error: true
@@ -70,14 +70,14 @@ jobs:
       - uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
         env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+          PLAN: "terraform\n${{ steps.test_plan.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.test_plan.outcome }}\`
             
             <details><summary>Show Plan</summary>
             
@@ -99,16 +99,10 @@ jobs:
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
-      
-      - name: set var file
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: cp ../vars/test.auto.tfvars var.auto.tfvars
 
-      - name: Terraform Apply
+      - name: Terraform Apply 
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
-      
-
      
 
       - name: Set environment for workflow_dispatch
