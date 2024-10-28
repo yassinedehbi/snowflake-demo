@@ -41,10 +41,10 @@ jobs:
         if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
         run: terraform workspace select test 
 
-      - name: Set Terraform env
+      - name: Set Terraform workspace ENV
         if: github.event_name == 'workflow_dispatch'
         run: terraform workspace select ${{ github.event.inputs.ENVIRONMENT }}
-        
+
       - name: Terraform Init
         id: init
         run: terraform init
