@@ -53,7 +53,7 @@ jobs:
       - name: set vars (manual) 
         id: customvar
         if: github.event_name == 'workflow_dispatch'
-        run: cp ../vars/${{ github.event.inputs.ENVIRONMENT.lowercase ) }}.auto.tfvars var.auto.tfvars
+        run: cp ../vars/${{ github.event.inputs.ENVIRONMENT.lowercase }}.auto.tfvars var.auto.tfvars
 
       - name: Terraform TEST Plan
         id: test_plan
