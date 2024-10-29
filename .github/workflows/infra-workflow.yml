@@ -37,9 +37,7 @@ jobs:
         id: fmt
         run: terraform fmt -check
 
-      - name: Terraform Init
-        id: init
-        run: terraform init -reconfigure
+      
 
       - name: Terraform Validate
         id: validate
@@ -50,14 +48,14 @@ jobs:
         if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
         run: cp ../vars/test.auto.tfvars var.auto.tfvars && terraform workspace select test
 
-      - name: set vars (manual) 
+      - name: set vars and workspace(manual) 
         id: customvar
         if: github.event_name == 'workflow_dispatch'
-        run: cp ../vars/${{ github.event.inputs.ENVIRONMENT }}.auto.tfvars var.auto.tfvars
+        run: cp ../vars/${{ github.event.inputs.ENVIRONMENT }}.auto.tfvars var.auto.tfvars && terraform workspace select ${{ github.event.inputs.ENVIRONMENT }}
 
-      - name: Set Workspace ( PROD or (DEV by default))
-        if: github.event_name == 'workflow_dispatch'
-        run: terraform workspace select ${{ github.event.inputs.ENVIRONMENT }}
+      - name: Terraform Init
+        id: init
+        run: terraform init
 
       - name: Terraform TEST Plan
         id: test_plan
