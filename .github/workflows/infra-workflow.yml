@@ -47,7 +47,6 @@ jobs:
         run: cp ../vars/test.auto.tfvars var.auto.tfvars && terraform workspace select test
 
       - name: set vars and workspace(manual) 
-      - name: set vars and workspace(manual) 
         id: customvar
         if: github.event_name == 'workflow_dispatch'
         run: cp ../vars/${{ github.event.inputs.ENVIRONMENT }}.auto.tfvars var.auto.tfvars && terraform workspace select ${{ github.event.inputs.ENVIRONMENT }}
