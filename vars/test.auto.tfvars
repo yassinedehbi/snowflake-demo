@@ -1,2 +1,2 @@
 environment    = "TEST"
-warehouse_size = "x-small"
+warehouse_size = "small"
