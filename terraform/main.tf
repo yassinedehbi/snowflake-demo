@@ -10,7 +10,7 @@ terraform {
     organization = "ayur"
 
     workspaces {
-      name = "snowflake-demo"
+      prefix = "snowflake-demo-"
     }
   }
 }

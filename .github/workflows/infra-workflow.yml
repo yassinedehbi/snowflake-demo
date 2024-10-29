@@ -39,21 +39,25 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform init
+        run: terraform init -reconfigure
 
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
 
-      - name: set test vars 
+      - name: set test vars and select workspace
         id: testvar
         if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
-        run: cp ../vars/test.auto.tfvars var.auto.tfvars
+        run: cp ../vars/test.auto.tfvars var.auto.tfvars && terraform workspace select test
 
       - name: set vars (manual) 
         id: customvar
         if: github.event_name == 'workflow_dispatch'
         run: cp ../vars/${{ github.event.inputs.ENVIRONMENT }}.auto.tfvars var.auto.tfvars
+
+      - name: Set Workspace ( PROD or (DEV by default))
+        if: github.event_name == 'workflow_dispatch'
+        run: terraform workspace select ${{ github.event.inputs.ENVIRONMENT }}
 
       - name: Terraform TEST Plan
         id: test_plan
@@ -104,7 +108,6 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
      
-
-      - name: Set environment for workflow_dispatch
+      - name: Set environment for workflow_dispatch & Apply :)
         if: github.event_name == 'workflow_dispatch'
         run: terraform apply -auto-approve
