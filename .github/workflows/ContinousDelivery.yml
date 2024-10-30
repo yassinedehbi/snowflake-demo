@@ -1,0 +1,107 @@
+name: "CD"
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      ENVIRONMENT:
+        description: 'Environment to deploy to (DEV, TEST, PROD !! only) (lower case)'
+        required: false
+        default: "PROD"  # Default for manual runs without quotes
+
+  
+jobs:
+  snowflake-terraform-deploy:
+    name: "Snowflake Terraform Job"
+    runs-on: ubuntu-latest
+    defaults:
+        run:
+            working-directory: terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_vesion: "1.9.8"
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+
+      - name: set test vars and select workspace
+        id: testvar
+        if: (github.ref == 'refs/heads/main' && github.event_name == 'push')
+        run: cp ../vars/test.auto.tfvars var.auto.tfvars && terraform workspace select test
+
+      - name: set vars and workspace(manual) 
+        id: customvar
+        if: github.event_name == 'workflow_dispatch'
+        run: cp ../vars/${{ github.event.inputs.ENVIRONMENT }}.auto.tfvars var.auto.tfvars && terraform workspace select ${{ github.event.inputs.ENVIRONMENT }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+      
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        
+      - name: Terraform Custom Plan
+        id: custom_plan
+        if: github.event_name == 'workflow_dispatch'
+        run: terraform plan -no-color
+        continue-on-error: true
+
+      - name: Terraform Plan Status
+        if: steps.custom_plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply 
+        if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+        run: terraform apply -auto-approve
+
+#####################################################################################################################
+  schema-change-apply:
+    runs-on: ubuntu-latest
+    needs: snowflake-terraform-deploy
+    defaults:
+        run:
+            working-directory: objects_statements
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Use Python 3.8.x
+        uses: actions/setup-python@v2.2.1
+        with:
+          python-version: 3.8.x
+
+      - name: Run schemachange
+        env:
+          SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
+        run: |
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          python --version
+          echo "Step 1: Installing schemachange"
+          pip install schemachange
+
+      - name: EXECUTE schemachange for MERGE or MANUAL EXEC
+        env:
+          SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
+        if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
+        run: |
+          echo "Running schemachange TO EXEC"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            schemachange -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB -c TEST_DB.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+          else
+            schemachange -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r "${{ github.event.inputs.ENVIRONMENT }}"_ROLE -w "${{ github.event.inputs.ENVIRONMENT }}"_WH -d "${{ github.event.inputs.ENVIRONMENT }}"_DB -c "${{ github.event.inputs.ENVIRONMENT }}_DB".SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+          fi
+

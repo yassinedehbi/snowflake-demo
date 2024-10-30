@@ -1,0 +1,122 @@
+name: "CI"
+
+on:
+  pull_request:
+  
+permissions:
+  issues: write
+  pull-requests: write
+  
+jobs:
+  snowflake-terraform-plan:
+    name: "Snowflake Terraform Job"
+    runs-on: ubuntu-latest
+    defaults:
+        run:
+            working-directory: terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_vesion: "1.9.8"
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+
+      - name: set test vars and select workspace
+        id: testvar
+        if: github.event_name == 'pull_request'
+        run: cp ../vars/test.auto.tfvars var.auto.tfvars && terraform workspace select test
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+      
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        
+      - name: Terraform TEST Plan
+        id: test_plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color
+        continue-on-error: true
+
+
+      - uses: actions/github-script@0.9.0
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.test_plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.test_plan.outcome }}\`
+            
+            <details><summary>Show Plan</summary>
+            
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+            
+            </details>
+            
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+     
+  
+  ######################################################################################################
+  schemachange-dry-run:
+    runs-on: ubuntu-latest
+    needs: snowflake-terraform-plan
+    defaults:
+        run:
+            working-directory: objects_statements
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Use Python 3.8.x
+        uses: actions/setup-python@v2.2.1
+        with:
+          python-version: 3.8.x
+
+      - name: Run schemachange
+        env:
+          SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
+        run: |
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          python --version
+          echo "Step 1: Installing schemachange"
+          pip install schemachange
+
+      - name: DRY RUN in case of PR
+        env:
+          SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
+        if: github.event_name == 'pull_request'
+        run: |
+          echo ${{ secrets.SF_ACCOUNT }}
+          echo $SF_ACCOUNT
+          echo "Step PR: Running schemachange DRY RUN"
+          schemachange -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB -c TEST_DB.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table --dry-run       
