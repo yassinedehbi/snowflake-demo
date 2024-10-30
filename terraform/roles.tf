@@ -6,5 +6,5 @@ resource "snowflake_role" "role" {
 resource "snowflake_grant_account_role" "grants" {
   provider  = snowflake.security_admin
   role_name = snowflake_role.role.name
-  user_name = "VISEO"
+  user_name = "SC_USER"
 }
