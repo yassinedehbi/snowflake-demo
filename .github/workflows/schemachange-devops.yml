@@ -7,9 +7,15 @@ on:
       - main
     paths:
       - 'objects_statements/**'
+  pull_request:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+        ENVIRONMENT:
+          description: 'Environment to deploy to (DEV, TEST, PROD !! only) (lower case)'
+          required: false
+          default: "PROD"  # Default for manual runs without quotes
 
 jobs:
   deploy-snowflake-changes-job:
