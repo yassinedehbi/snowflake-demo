@@ -6,7 +6,7 @@ resource "snowflake_database" "db" {
 
 resource "snowflake_grant_privileges_to_account_role" "database_grant" {
   provider          = snowflake.security_admin
-  privileges        = ["USAGE"]
+  privileges        = ["USAGE", "CREATE SCHEMA"]
   account_role_name = snowflake_role.role.name
   on_account_object {
     object_type = "DATABASE"
@@ -80,7 +80,7 @@ resource "snowflake_grant_privileges_to_account_role" "schema_grant3" {
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "tables_grant" {
+resource "snowflake_grant_privileges_to_account_role" "future_tables_grant" {
   provider          = snowflake.security_admin
   privileges        = ["SELECT", "INSERT"]
   account_role_name = snowflake_role.role.name
@@ -91,3 +91,4 @@ resource "snowflake_grant_privileges_to_account_role" "tables_grant" {
     }
   }
 }
+ 
