@@ -51,6 +51,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           echo "Step PR: Running schemachange DRY RUN"
+          echo $SF_ACCOUNT
           schemachange -f . -a $SF_ACCOUNT -u $SF_USERNAME -r TEST_ROLE -w TEST_WH -d TEST_DB -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table --dry-run       
       - name: EXECUTE schemachange for MERGE or MANUAL EXEC
         if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
