@@ -52,7 +52,9 @@ jobs:
           echo ${{ secrets.SF_ACCOUNT }}
           echo $SF_ACCOUNT
           echo "Step PR: Running schemachange DRY RUN"
-          schemachange -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table --dry-run       
+          schemachange -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB -c TEST_DB.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table --dry-run       
+
+
       - name: EXECUTE schemachange for MERGE or MANUAL EXEC
         env:
           SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
@@ -60,7 +62,7 @@ jobs:
         run: |
           echo "Running schemachange TO EXEC"
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            schemachange -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+            schemachange -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB -c TEST_DB.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
           else
             schemachange -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r "${{ github.event.inputs.ENVIRONMENT }}"_ROLE -w "${{ github.event.inputs.ENVIRONMENT }}"_WH -d "${{ github.event.inputs.ENVIRONMENT }}"_DB -c "${{ github.event.inputs.ENVIRONMENT }}_DB".SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
           fi
