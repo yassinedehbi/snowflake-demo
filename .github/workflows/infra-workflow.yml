@@ -1,4 +1,4 @@
-name: "Snowflake Terraform Workflow"
+name: "Snowflake Terraform Workflow to manage account level objects"
 
 on:
   push:
@@ -18,8 +18,8 @@ permissions:
   pull-requests: write
   
 jobs:
-  snowflake-terraform-demo:
-    name: "Snowflake Terraform Demo Job"
+  snowflake-terraform-deploy:
+    name: "Snowflake Terraform Job"
     runs-on: ubuntu-latest
     defaults:
         run:

@@ -1,0 +1,57 @@
+name: "Snowflake Schemachange to manage schema level objects"
+
+# Controls when the action will run.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'objects_statements/**'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy-snowflake-changes-job:
+    runs-on: ubuntu-latest
+    defaults:
+        run:
+            working-directory: objects_statements
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Use Python 3.8.x
+        uses: actions/setup-python@v2.2.1
+        with:
+          python-version: 3.8.x
+
+      - name: Run schemachange
+        env:
+          SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_ROLE: ${{ secrets.SF_ROLE }}
+          SF_WAREHOUSE: ${{ secrets.SF_WAREHOUSE }}
+          SF_DATABASE: ${{ secrets.SF_DATABASE }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
+        run: |
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          python --version
+          echo "Step 1: Installing schemachange"
+          pip install schemachange
+
+      - name: DRY RUN in case of PR
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Step PR: Running schemachange DRY RUN"
+          schemachange -f . -a $SF_ACCOUNT -u $SF_USERNAME -r TEST_ROLE -w TEST_WH -d TEST_DB -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table --dry-run       
+      - name: EXECUTE schemachange for MERGE or MANUAL EXEC
+        if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
+        run: |
+          echo "Running schemachange TO EXEC"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            schemachange -f . -a $SF_ACCOUNT -u $SF_USERNAME -r TEST_ROLE -w TEST_WH -d TEST_DB -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+          else
+            schemachange -f . -a $SF_ACCOUNT -u $SF_USERNAME -r "${{ github.event.inputs.ENVIRONMENT }}"_ROLE -w "${{ github.event.inputs.ENVIRONMENT }}"_WH -d "${{ github.event.inputs.ENVIRONMENT }}"_DB -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+          fi
