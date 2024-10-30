@@ -37,9 +37,6 @@ jobs:
         env:
           SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
           SF_USERNAME: ${{ secrets.SF_USERNAME }}
-          SF_ROLE: ${{ secrets.SF_ROLE }}
-          SF_WAREHOUSE: ${{ secrets.SF_WAREHOUSE }}
-          SF_DATABASE: ${{ secrets.SF_DATABASE }}
           SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
         run: |
           echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
@@ -51,7 +48,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           echo "Step PR: Running schemachange DRY RUN"
-          schemachange -a "hf52656.west-europe.azure" -u $SF_USERNAME -r TEST_ROLE -w TEST_WH -d TEST_DB -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table --dry-run       
+          schemachange -a $SF_ACCOUNT -u $SF_USERNAME -r TEST_ROLE -w TEST_WH -d TEST_DB -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table --dry-run       
       - name: EXECUTE schemachange for MERGE or MANUAL EXEC
         if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
         run: |
@@ -59,5 +56,5 @@ jobs:
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             schemachange -f . -a $SF_ACCOUNT -u $SF_USERNAME -r TEST_ROLE -w TEST_WH -d TEST_DB -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
           else
-            schemachange -f . -a $SF_ACCOUNT -u $SF_USERNAME -r "${{ github.event.inputs.ENVIRONMENT }}"_ROLE -w "${{ github.event.inputs.ENVIRONMENT }}"_WH -d "${{ github.event.inputs.ENVIRONMENT }}"_DB -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+            schemachange -f . -a $SF_ACCOUNT -u $SF_USERNAME -r "${{ github.event.inputs.ENVIRONMENT }}"_ROLE -w "${{ github.event.inputs.ENVIRONMENT }}"_WH -d "${{ github.event.inputs.ENVIRONMENT }}"_DB -c "${{ github.event.inputs.ENVIRONMENT }}_DB".SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
           fi
