@@ -1,4 +1,4 @@
-name: "Snowflake Schemachange to manage schema level objects"
+# name: "Snowflake Schemachange to manage schema level objects"
 
 # Controls when the action will run.
 # on:
@@ -9,60 +9,60 @@ name: "Snowflake Schemachange to manage schema level objects"
 #       - 'objects_statements/**'
 #   pull_request:
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-    inputs:
-        ENVIRONMENT:
-          description: 'Environment to deploy to (DEV, TEST, PROD !! only) (lower case)'
-          required: false
-          default: "PROD"  # Default for manual runs without quotes
+#   Allows you to run this workflow manually from the Actions tab
+#   workflow_dispatch:
+#     inputs:
+#         ENVIRONMENT:
+#           description: 'Environment to deploy to (DEV, TEST, PROD !! only) (lower case)'
+#           required: false
+#           default: "PROD"  # Default for manual runs without quotes
 
-jobs:
-  deploy-snowflake-changes-job:
-    runs-on: ubuntu-latest
-    defaults:
-        run:
-            working-directory: objects_statements
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout repository
-        uses: actions/checkout@v2
+# jobs:
+#   deploy-snowflake-changes-job:
+#     runs-on: ubuntu-latest
+#     defaults:
+#         run:
+#             working-directory: objects_statements
+#     steps:
+#       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+#       - name: Checkout repository
+#         uses: actions/checkout@v2
 
-      - name: Use Python 3.8.x
-        uses: actions/setup-python@v2.2.1
-        with:
-          python-version: 3.8.x
+#       - name: Use Python 3.8.x
+#         uses: actions/setup-python@v2.2.1
+#         with:
+#           python-version: 3.8.x
 
-      - name: Run schemachange
-        env:
-          SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
-          SF_USERNAME: ${{ secrets.SF_USERNAME }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
-        run: |
-          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-          python --version
-          echo "Step 1: Installing schemachange"
-          pip install schemachange
+#       - name: Run schemachange
+#         env:
+#           SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
+#           SF_USERNAME: ${{ secrets.SF_USERNAME }}
+#           SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
+#         run: |
+#           echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+#           python --version
+#           echo "Step 1: Installing schemachange"
+#           pip install schemachange
 
-      - name: DRY RUN in case of PR
-        env:
-          SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
-        if: github.event_name == 'pull_request'
-        run: |
-          echo ${{ secrets.SF_ACCOUNT }}
-          echo $SF_ACCOUNT
-          echo "Step PR: Running schemachange DRY RUN"
-          schemachange -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB -c TEST_DB.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table --dry-run       
+#       - name: DRY RUN in case of PR
+#         env:
+#           SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
+#         if: github.event_name == 'pull_request'
+#         run: |
+#           echo ${{ secrets.SF_ACCOUNT }}
+#           echo $SF_ACCOUNT
+#           echo "Step PR: Running schemachange DRY RUN"
+#           schemachange -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB -c TEST_DB.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table --dry-run       
 
 
-      - name: EXECUTE schemachange for MERGE or MANUAL EXEC
-        env:
-          SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
-        if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
-        run: |
-          echo "Running schemachange TO EXEC"
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            schemachange -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB -c TEST_DB.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
-          else
-            schemachange -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r "${{ github.event.inputs.ENVIRONMENT }}"_ROLE -w "${{ github.event.inputs.ENVIRONMENT }}"_WH -d "${{ github.event.inputs.ENVIRONMENT }}"_DB -c "${{ github.event.inputs.ENVIRONMENT }}_DB".SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
-          fi
+#       - name: EXECUTE schemachange for MERGE or MANUAL EXEC
+#         env:
+#           SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
+#         if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
+#         run: |
+#           echo "Running schemachange TO EXEC"
+#           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+#             schemachange -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB -c TEST_DB.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+#           else
+#             schemachange -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r "${{ github.event.inputs.ENVIRONMENT }}"_ROLE -w "${{ github.event.inputs.ENVIRONMENT }}"_WH -d "${{ github.event.inputs.ENVIRONMENT }}"_DB -c "${{ github.event.inputs.ENVIRONMENT }}_DB".SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+#           fi
