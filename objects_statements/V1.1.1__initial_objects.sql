@@ -507,7 +507,7 @@ create or replace stream STAGING.STG_SALES_STRM on table STAGING.STG_SALES_RAW ;
 
 ------------------------------- Create TASKS to insert NEW data to CLEAN Tables from RAW tables -----------------
 create or replace task STAGING.STG_LOCATION_TSK
-	warehouse=DEV_WH
+	warehouse={{warehouse}}
 	when system$stream_has_data('staging.stg_location_strm')
 	as insert into stg_location with no_date as (
 select * exclude(date_partition, metadata$action,METADATA$ROW_ID
@@ -517,7 +517,7 @@ select * exclude(date_partition, metadata$action,METADATA$ROW_ID
 select distinct * from no_date;
 
 create or replace task STAGING.STG_PRODUCT_TSK
-	warehouse=DEV_WH
+	warehouse={{warehouse}}
 	when system$stream_has_data('staging.stg_product_strm')
 	as insert into stg_product
 with no_date as (
@@ -534,7 +534,7 @@ select dd.* from deduplicate_dates dd join duplicates_sku ds on dd.sku_id = ds.s
 
 
 create or replace task STAGING.STG_SALES_TSK
-	warehouse=DEV_WH
+	warehouse={{warehouse}}
 	when system$stream_has_data('staging.stg_sales_strm')
 	as insert into stg_sales with TEST as (
 select * exclude(metadata$action,METADATA$ROW_ID,METADATA$ISUPDATE)
@@ -1130,7 +1130,7 @@ create or replace table raw_dtv.lnk_product_sales (
 ---------------------------- Create Tasks to Alimenter Tables of RAW DATAVAULT model & Resume
 
 create or replace task RAW_DTV.LOCATION_STRM_TSK
-	warehouse=DEV_WH
+	warehouse={{warehouse}}
 	when SYSTEM$STREAM_HAS_DATA('LOCATION_OUTBOUND_STRM')
 	as INSERT ALL
 WHEN (SELECT COUNT(1) FROM hub_location tgt WHERE tgt.sha1_hub_location = src_sha1_hub_location) = 0
@@ -1383,7 +1383,7 @@ SELECT
   FROM staging.stg_location_view src;
 
   create or replace task RAW_DTV.PRODUCT_STRM_TSK
-	warehouse=DEV_WH
+	warehouse={{warehouse}}
 	when SYSTEM$STREAM_HAS_DATA('PRODUCT_OUTBOUND_STRM')
 	as INSERT ALL
 WHEN (SELECT COUNT(1) FROM hub_product tgt WHERE tgt.sha1_hub_product = src_sha1_hub_product ) = 0
@@ -1706,7 +1706,7 @@ SELECT
   FROM staging.stg_product_view src;
 
   create or replace task RAW_DTV.SALES_STRM_TSK
-	warehouse=DEV_WH
+	warehouse={{warehouse}}
 	when SYSTEM$STREAM_HAS_DATA('SALES_OUTBOUND_STRM')
 	as INSERT ALL
 WHEN (SELECT COUNT(1) FROM hub_sales tgt WHERE tgt.sha1_hub_sales = src_sha1_hub_sales ) = 0
