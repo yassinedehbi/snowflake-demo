@@ -23,7 +23,7 @@ resource "snowflake_schema" "staging" {
 
 resource "snowflake_grant_privileges_to_account_role" "schema_grant" {
   provider          = snowflake.security_admin
-  privileges        = ["USAGE"]
+  privileges        = ["USAGE", "CREATE TABLE", "CREATE VIEW", "CREATE STAGE", "CREATE FILE FORMAT", "CREATE TASK", "CREATE STREAM"]
   account_role_name = snowflake_role.role.name
   on_schema {
     schema_name = "\"${snowflake_database.db.name}\".\"${snowflake_schema.staging.name}\""
@@ -40,7 +40,7 @@ resource "snowflake_schema" "raw_dtv" {
 
 resource "snowflake_grant_privileges_to_account_role" "schema_grant1" {
   provider          = snowflake.security_admin
-  privileges        = ["USAGE"]
+  privileges        = ["USAGE", "CREATE TABLE", "CREATE VIEW", "CREATE STAGE", "CREATE FILE FORMAT", "CREATE TASK", "CREATE STREAM"]
   account_role_name = snowflake_role.role.name
   on_schema {
     schema_name = "\"${snowflake_database.db.name}\".\"${snowflake_schema.raw_dtv.name}\""
@@ -57,7 +57,7 @@ resource "snowflake_schema" "business_dtv" {
 
 resource "snowflake_grant_privileges_to_account_role" "schema_grant2" {
   provider          = snowflake.security_admin
-  privileges        = ["USAGE"]
+  privileges        = ["USAGE", "CREATE TABLE", "CREATE VIEW", "CREATE STAGE", "CREATE FILE FORMAT", "CREATE TASK", "CREATE STREAM"]
   account_role_name = snowflake_role.role.name
   on_schema {
     schema_name = "\"${snowflake_database.db.name}\".\"${snowflake_schema.business_dtv.name}\""
@@ -73,7 +73,7 @@ resource "snowflake_schema" "info_delivery" {
 
 resource "snowflake_grant_privileges_to_account_role" "schema_grant3" {
   provider          = snowflake.security_admin
-  privileges        = ["USAGE"]
+  privileges        = ["USAGE", "CREATE TABLE", "CREATE VIEW", "CREATE STAGE", "CREATE FILE FORMAT", "CREATE TASK", "CREATE STREAM"]
   account_role_name = snowflake_role.role.name
   on_schema {
     schema_name = "\"${snowflake_database.db.name}\".\"${snowflake_schema.info_delivery.name}\""
