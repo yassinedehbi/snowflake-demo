@@ -10,7 +10,7 @@ resource "snowflake_grant_account_role" "grants" {
 }
 
 resource "snowflake_grant_account_role" "rolegrant" {
-  provider = snowflake.security_admin
-  role_name = snowflake_role.role.name
+  provider         = snowflake.security_admin
+  role_name        = snowflake_role.role.name
   parent_role_name = "SYSADMIN"
 }
