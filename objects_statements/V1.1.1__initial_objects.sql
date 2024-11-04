@@ -2,11 +2,11 @@
 use schema staging;
 
  -------------------------------------------- Create stages ---------------------
-create or replace stage product_data file_format = (type = CSV skip_header = 1 );
+create stage if not exists product_data file_format = (type = CSV skip_header = 1 ) DIRECTORY = (ENABLE = TRUE) ;
 
-create or replace stage location_data file_format = (type = CSV skip_header = 1 FIELD_DELIMITER = ',');
+create stage if not exists location_data file_format = (type = CSV skip_header = 1 FIELD_DELIMITER = ',') DIRECTORY = (ENABLE = TRUE);
 
-create or replace stage sales_data file_format = (type = CSV skip_header = 1 FIELD_DELIMITER = ',');
+create stage if not exists sales_data file_format = (type = CSV skip_header = 1 FIELD_DELIMITER = ',') DIRECTORY = (ENABLE = TRUE);
 
 
  -------------------------------------------- Create staging RAW Tables ---------------------
