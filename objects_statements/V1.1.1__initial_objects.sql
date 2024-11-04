@@ -536,7 +536,7 @@ deduplicate_dates as (
 duplicates_sku as (
     select sku_id,  count(*) from deduplicate_dates group by sku_id having count(*) > 1 
 )
-select dd.* from deduplicate_dates dd join duplicates_sku ds on dd.sku_id = ds.sku_id;
+select dd.* from deduplicate_dates dd left join duplicates_sku ds on dd.sku_id = ds.sku_id;
 
 
 create or replace task STAGING.STG_SALES_TSK
