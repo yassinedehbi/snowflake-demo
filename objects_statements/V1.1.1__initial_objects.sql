@@ -232,10 +232,15 @@ create or replace table  stg_sales_raw (
     __DELETE_FLAG BOOLEAN  COMMENT 'Logical deletion flag: true = deleted, false = valid',
     DATE_PARTITION VARCHAR  COMMENT 'Full copy timestamp  (YYYY-MM-DD HH24:MI:SS)',
     ldts timestamp,
-    source_file varchar
+    source_file varchar,
+    TRANSACTION_SALES NUMBER(38,0) COMMENT 'Unique KEY for each row'
 );
 
  -------------------------------------------- Create  Pipes to ingest data from Stages to Tables ---------------------
+
+
+----- Create Sequence
+CREATE OR REPLACE SEQUENCE seq_transaction_01 START = 1 INCREMENT = 1;
 
 CREATE OR REPLACE PIPE STG_SALES_PP as 
 
@@ -245,8 +250,9 @@ select  $1 ,$2 ,$3 ,$4 ,$5 ,$6 ,$7 ,$8 ,$9 ,$10 ,$11 ,$12 ,$13 ,$14
 ,$32 ,$33 ,$34 ,$35 ,$36 ,$37 ,$38 ,$39 ,$40 ,$41
 , current_timestamp()
 , metadata$filename
+,  seq_transaction_01.nextval
  from @sales_data) ;
-ALTER PIPE stg_sales_pp REFRESH ;
+-- ALTER PIPE stg_sales_pp REFRESH ;
 
  create or replace pipe stg_location_pp   
 as
@@ -259,7 +265,7 @@ select $1 ,$2 ,$3 ,$4 ,$5 ,$6 ,$7 ,$8 ,$9 ,$10 ,$11 ,$12 ,$13 ,$14
 ,metadata$filename
  from @location_data);
 
-ALTER PIPE stg_location_pp REFRESH ;
+-- ALTER PIPE stg_location_pp REFRESH ;
 
 create or replace pipe stg_product_pp as
 copy into stg_product_raw from (
@@ -272,7 +278,7 @@ select $1 ,$2 ,$3 ,$4 ,$5 ,$6 ,$7 ,$8 ,$9 ,$10 ,$11 ,$12 ,$13 ,$14
 ,metadata$filename
  from @product_data) ;
 
-ALTER PIPE stg_product_pp REFRESH ;
+-- ALTER PIPE stg_product_pp REFRESH ;
 
  -------------------------------------------- Create CLEAN Staging Tables structure ---------------------
 
@@ -320,7 +326,7 @@ create or replace TABLE STAGING.STG_SALES (
 	DATE_PARTITION VARCHAR(16777216) COMMENT 'Full copy timestamp  (YYYY-MM-DD HH24:MI:SS)',
 	LDTS TIMESTAMP_NTZ(9),
 	SOURCE_FILE VARCHAR(16777216),
-	TRANSACTION_SALES NUMBER(38,0) COMMENT 'Unique PRIMARY KEY'
+	TRANSACTION_SALES NUMBER(38,0) COMMENT 'Unique KEY'
 );
 
 create or replace TABLE STAGING.STG_PRODUCT (
@@ -539,8 +545,11 @@ create or replace task STAGING.STG_SALES_TSK
 	as insert into stg_sales with TEST as (
 select * exclude(metadata$action,METADATA$ROW_ID,METADATA$ISUPDATE)
 from stg_sales_strm
-)
-select *, row_number() over(order by update_date) as transaction_sales from TEST;
+);
+
+ALTER TASK staging.STG_LOCATION_TSK RESUME;
+ALTER TASK staging.STG_PRODUCT_TSK RESUME;
+ALTER TASK staging.STG_SALES_TSK RESUME;
 
 ------------------------------- Create Streams on RDTV schema (first bcs views will take from STREAMS) -----------------
 
