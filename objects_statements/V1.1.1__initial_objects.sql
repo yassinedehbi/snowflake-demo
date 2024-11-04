@@ -545,7 +545,8 @@ create or replace task STAGING.STG_SALES_TSK
 	as insert into stg_sales with TEST as (
 select * exclude(metadata$action,METADATA$ROW_ID,METADATA$ISUPDATE)
 from stg_sales_strm
-);
+)
+select * from TEST;
 
 ALTER TASK staging.STG_LOCATION_TSK RESUME;
 ALTER TASK staging.STG_PRODUCT_TSK RESUME;
