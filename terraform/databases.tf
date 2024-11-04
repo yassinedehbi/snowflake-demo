@@ -23,7 +23,7 @@ resource "snowflake_schema" "staging" {
 
 resource "snowflake_grant_privileges_to_account_role" "schema_grant" {
   provider          = snowflake.security_admin
-  privileges        = ["USAGE", "CREATE TABLE", "CREATE VIEW", "CREATE STAGE", "CREATE FILE FORMAT", "CREATE TASK", "CREATE STREAM", "CREATE PIPE"]
+  privileges        = ["USAGE", "CREATE TABLE", "CREATE VIEW", "CREATE STAGE", "CREATE FILE FORMAT", "CREATE TASK", "CREATE STREAM", "CREATE PIPE", "CREATE SEQUENCE"]
   account_role_name = snowflake_role.role.name
   on_schema {
     schema_name = "\"${snowflake_database.db.name}\".\"${snowflake_schema.staging.name}\""
