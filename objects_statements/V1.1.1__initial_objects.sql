@@ -1,12 +1,45 @@
--------------------------------- LANDING ----------------------------------------
+/* ------------------------------------------------------------------------------
+   File Name: V1.1.1__initial_objects.sql
+   Description: 
+       This SQL script sets up the initial objects required for the DataVault Architecture, 
+       including stages - raw staging tables within the "staging" schema. 
+       The tables and stages are designed to ingest CSV-formatted data for 
+       "product", "location", and "sales" datasets in preparation for further 
+       transformation and processing in a Data Vault model.
+
+   Schema: 
+       staging
+
+   Objects Created:
+       1. Stages:
+           - product_data
+           - location_data
+           - sales_data
+
+       2. Tables:
+           - STG_LOCATION_RAW
+           - Additional raw tables as required for data ingestion.
+
+   File Format:
+       CSV with headers (header row skipped, fields delimited by ',')
+
+   Notes:
+       - Ensure that the staging schema is selected before execution.
+       - Adjust column data types and delimiters if input file formats change.
+
+   Author:  M'hamed Issam ED-DAOU && Yassine DEHBI  -- VISEO
+------------------------------------------------------------------------------- */
+
+
+-------------------------------- LANDING / Staging schema ----------------------------------------
 use schema staging;
 
  -------------------------------------------- Create stages ---------------------
-create stage if not exists product_data file_format = (type = CSV skip_header = 1 ) DIRECTORY = (ENABLE = TRUE) ;
+create or replace stage product_data file_format = (type = CSV skip_header = 1 );
 
-create stage if not exists location_data file_format = (type = CSV skip_header = 1 FIELD_DELIMITER = ',') DIRECTORY = (ENABLE = TRUE);
+create or replace stage location_data file_format = (type = CSV skip_header = 1 FIELD_DELIMITER = ',');
 
-create stage if not exists sales_data file_format = (type = CSV skip_header = 1 FIELD_DELIMITER = ',') DIRECTORY = (ENABLE = TRUE);
+create or replace stage sales_data file_format = (type = CSV skip_header = 1 FIELD_DELIMITER = ',');
 
 
  -------------------------------------------- Create staging RAW Tables ---------------------
@@ -326,7 +359,7 @@ create or replace TABLE STAGING.STG_SALES (
 	DATE_PARTITION VARCHAR(16777216) COMMENT 'Full copy timestamp  (YYYY-MM-DD HH24:MI:SS)',
 	LDTS TIMESTAMP_NTZ(9),
 	SOURCE_FILE VARCHAR(16777216),
-	TRANSACTION_SALES NUMBER(38,0) COMMENT 'Unique KEY'
+	TRANSACTION_SALES NUMBER(38,0) COMMENT 'Unique KEY for each row'
 );
 
 create or replace TABLE STAGING.STG_PRODUCT (
@@ -1137,7 +1170,7 @@ create or replace table raw_dtv.lnk_product_sales (
 );
 
 
----------------------------- Create Tasks to Alimenter Tables of RAW DATAVAULT model & Resume
+---------------------------- Create Tasks to Alimenter Tables of RAW DATAVAULT model & Resume ------
 
 create or replace task RAW_DTV.LOCATION_STRM_TSK
 	warehouse={{warehouse}}
@@ -1918,7 +1951,7 @@ SOURCE_FILE src_source_file,
 SALES_HASH_DIFF src_hash_diff
     
   FROM staging.stg_sales_view src;
-
+  
 ALTER TASK raw_dtv.SALES_STRM_TSK RESUME;
 ALTER TASK raw_dtv.PRODUCT_STRM_TSK RESUME;
 ALTER TASK raw_dtv.LOCATION_STRM_TSK RESUME;
