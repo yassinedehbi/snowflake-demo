@@ -16,16 +16,44 @@
            - location_data
            - sales_data
 
-       2. Tables:
-           - STG_LOCATION_RAW
-           - Additional raw tables as required for data ingestion.
+       2. Pipes :
+           - STG_LOCATION_PP / STG_PRODUCT_PP / STG_SALES_PP
 
-   File Format:
-       CSV with headers (header row skipped, fields delimited by ',')
+       3. Tables:
+           - STG_LOCATION_RAW / STG_PRODUCT_RAW / STG_SALES_RAW
+           - STG_LOCATION / STG_PRODUCT / STG_SALES   (after cleansing)
+        
+        4. Streams :
+           - STG_LOCATION_STRM / STG_PRODUCT_STRM / STG_SALES_STRM (Keeps track of changes in STG_X_RAW tables)
 
-   Notes:
-       - Ensure that the staging schema is selected before execution.
-       - Adjust column data types and delimiters if input file formats change.
+        5. Tasks:
+           - STG_LOCATION_TSK / STG_PRODUCT_TSK / STG_SALES_TSK  (move data from tables STG_X_RAW to STG_X based on a stream)
+        
+        6. Views:
+           - STG_LOCATION_VIEW / STG_PRODUCT_VIEW / STG_SALES_VIEW  (Reference streams present in the raw_dtv schema)
+
+    Schema: 
+       raw_dtv
+
+   Objects Created:
+
+       1. Tables:
+           - HUB_LOCATION
+           - HUB_PRODUCT
+           - HUB_SALES
+           - SAT_LOCATION
+           - SAT_PRODUCT
+           - SAT_SALES
+           - LNK_PRODUCT_SALES
+           - LNK_LOCATION_SALES
+
+        2. Streams :
+           - LOCATION_OUTBOUND_STRM / PRODUCT_OUTBOUND_STRM / SALES_OUTBOUND_STRM (Keeps track of changes in STG_X tables)
+        
+        3. Tasks :
+           - LOCATION_STRM_TSK / PRODUCT_STRM_TSK / SALES_STRM_TSK ( Tasks to orchestrate movement from staging to raw_dtv , se basant sur les vues dans STAGING)
+
+
 
    Author:  M'hamed Issam ED-DAOU && Yassine DEHBI  -- VISEO
 ------------------------------------------------------------------------------- */
@@ -540,9 +568,9 @@ create or replace TABLE STAGING.STG_LOCATION (
 );
 
 ------------------------------- Create STREAMS to detect changes on RAW TABLES -----------------
-create or replace stream STAGING.STG_LOCATION_STRM on table STAGING.STG_LOCATION_RAW;
-create or replace stream STAGING.STG_PRODUCT_STRM on table STAGING.STG_PRODUCT_RAW;
-create or replace stream STAGING.STG_SALES_STRM on table STAGING.STG_SALES_RAW ;
+create or replace stream STAGING.STG_LOCATION_STRM on table STAGING.STG_LOCATION_RAW append_only = TRUE;
+create or replace stream STAGING.STG_PRODUCT_STRM on table STAGING.STG_PRODUCT_RAW append_only = TRUE;
+create or replace stream STAGING.STG_SALES_STRM on table STAGING.STG_SALES_RAW append_only = TRUE ;
 
 ------------------------------- Create TASKS to insert NEW data to CLEAN Tables from RAW tables -----------------
 create or replace task STAGING.STG_LOCATION_TSK
@@ -558,18 +586,14 @@ select distinct * from no_date;
 create or replace task STAGING.STG_PRODUCT_TSK
 	warehouse={{warehouse}}
 	when system$stream_has_data('staging.stg_product_strm')
-	as insert into stg_product
-with no_date as (
-    select * exclude(date_partition, metadata$action,METADATA$ROW_ID, METADATA$ISUPDATE) from stg_product_strm
-),
-deduplicate_dates as (
-    select distinct * from no_date
-),
--- select * from deduplicate_dates;
-duplicates_sku as (
-    select sku_id,  count(*) from deduplicate_dates group by sku_id having count(*) > 1 
-)
-select dd.* from deduplicate_dates dd left join duplicates_sku ds on dd.sku_id = ds.sku_id;
+	as 
+ insert into stg_product
+ with no_metadata as (
+ select * exclude( metadata$action,METADATA$ROW_ID, METADATA$ISUPDATE) from  stg_product_strm
+ ),
+ deduplicates as (
+select *   from no_metadata where sku_id <> 0 qualify row_number() over(partition by sku_id order by date_partition desc) =1
+)select * exclude(date_partition) from deduplicates;
 
 
 create or replace task STAGING.STG_SALES_TSK
@@ -587,9 +611,9 @@ ALTER TASK staging.STG_SALES_TSK RESUME;
 
 ------------------------------- Create Streams on RDTV schema (first bcs views will take from STREAMS) -----------------
 
-create or replace stream RAW_DTV.LOCATION_OUTBOUND_STRM on table STAGING.STG_LOCATION ;
-create or replace stream RAW_DTV.PRODUCT_OUTBOUND_STRM on table STAGING.STG_PRODUCT;
-create or replace stream RAW_DTV.SALES_OUTBOUND_STRM on table STAGING.STG_SALES;
+create or replace stream RAW_DTV.LOCATION_OUTBOUND_STRM on table STAGING.STG_LOCATION append_only = TRUE;
+create or replace stream RAW_DTV.PRODUCT_OUTBOUND_STRM on table STAGING.STG_PRODUCT append_only = TRUE;
+create or replace stream RAW_DTV.SALES_OUTBOUND_STRM on table STAGING.STG_SALES append_only = TRUE;
 
 ------------------------------- Create VIEWS to outbound (move from STG TO RDTV) -----------------
 
@@ -1951,7 +1975,7 @@ SOURCE_FILE src_source_file,
 SALES_HASH_DIFF src_hash_diff
     
   FROM staging.stg_sales_view src;
-  
+
 ALTER TASK raw_dtv.SALES_STRM_TSK RESUME;
 ALTER TASK raw_dtv.PRODUCT_STRM_TSK RESUME;
 ALTER TASK raw_dtv.LOCATION_STRM_TSK RESUME;
