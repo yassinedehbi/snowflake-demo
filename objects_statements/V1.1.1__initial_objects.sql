@@ -615,9 +615,11 @@ create or replace stream RAW_DTV.LOCATION_OUTBOUND_STRM on table STAGING.STG_LOC
 create or replace stream RAW_DTV.PRODUCT_OUTBOUND_STRM on table STAGING.STG_PRODUCT append_only = TRUE;
 create or replace stream RAW_DTV.SALES_OUTBOUND_STRM on table STAGING.STG_SALES append_only = TRUE;
 
+-------------------------------- RAW DATA VAULT SCHEMA  ----------------------------------------
+use schema raw_dtv;
 ------------------------------- Create VIEWS to outbound (move from STG TO RDTV) -----------------
 
-create or replace view STAGING.STG_LOCATION_VIEW(
+create or replace view RAW_DTV.LOCATION_OUTBOUND_VIEW(
 	LOCATION_CODE,
 	LOCATION_ID,
 	LOCATION_PLANNING_CODE,
@@ -715,7 +717,7 @@ SELECT src.*
   FROM RAW_DTV.LOCATION_OUTBOUND_STRM src
 ;
 
-create or replace view STAGING.STG_PRODUCT_VIEW(
+create or replace view RAW_DTV.PRODUCT_OUTBOUND_VIEW(
 	SKU_ID,
 	SIZE_CODE_REF,
 	SIZE_CODE_DESC,
@@ -837,7 +839,7 @@ SELECT src.*
   FROM RAW_DTV.PRODUCT_OUTBOUND_STRM src
 ;
 
-create or replace view STAGING.STG_SALES_VIEW(
+create or replace view RAW_DTV.SALES_OUTBOUND_VIEW(
 	PARTITION_KEY,
 	SUBPARTITION_KEY,
 	TICKET_CODE,
@@ -919,8 +921,7 @@ SELECT src.*
   FROM RAW_DTV.SALES_OUTBOUND_STRM src
 ;
 
--------------------------------- RAW DATA VAULT SCHEMA  ----------------------------------------
-use schema raw_dtv;
+
 
 ------------------------HUBs---------------------------------------------------
 create or replace table raw_dtv.hub_location (
