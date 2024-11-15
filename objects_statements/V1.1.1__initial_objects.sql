@@ -1448,7 +1448,7 @@ SELECT
     location_HASH_DIFF SRC_HASH_DIFF,
     LDTS SRC_LDTS,
     SOURCE_FILE SRC_SOURCE_FILE
-  FROM staging.stg_location_view src;
+  FROM raw_dtv.LOCATION_OUTBOUND_VIEW src;
 
   create or replace task RAW_DTV.PRODUCT_STRM_TSK
 	warehouse={{warehouse}}
@@ -1771,7 +1771,7 @@ SELECT
     product_HASH_DIFF SRC_HASH_DIFF,
     LDTS SRC_LDTS,
     SOURCE_FILE SRC_SOURCE_FILE
-  FROM staging.stg_product_view src;
+  FROM raw_dtv.PRODUCT_OUTBOUND_VIEW src;
 
   create or replace task RAW_DTV.SALES_STRM_TSK
 	warehouse={{warehouse}}
@@ -1975,7 +1975,7 @@ LDTS src_ldts,
 SOURCE_FILE src_source_file,
 SALES_HASH_DIFF src_hash_diff
     
-  FROM staging.stg_sales_view src;
+  FROM raw_dtv.SALES_OUTBOUND_VIEW src;
 
 ALTER TASK raw_dtv.SALES_STRM_TSK RESUME;
 ALTER TASK raw_dtv.PRODUCT_STRM_TSK RESUME;
