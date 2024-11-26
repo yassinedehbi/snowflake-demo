@@ -583,7 +583,7 @@ select * exclude(date_partition, metadata$action,METADATA$ROW_ID
  ) from stg_location_strm
 )
 select distinct * from no_date;
-CREATE OR REPLACE TASK TEST_DB.STAGING.STG_PRODUCT_TSK
+CREATE OR REPLACE TASK STAGING.STG_PRODUCT_TSK
     WAREHOUSE = {{warehouse}}
     WHEN SYSTEM$STREAM_HAS_DATA('staging.stg_product_strm')
 AS
