@@ -34,7 +34,26 @@ models:
     # Config indicated by + and applies to all files under models/example/
     raw_stage:
       +materialized: view
+      +tags:
+        - 'raw'
     stage:
       +materialized: view
+      +tags:
+        - 'stage'
+      +enabled: true
     raw_vault:
       +materialized: incremental
+      +tags:
+        - 'raw_vault'
+      hubs:
+        +tags:
+          - 'hub'
+      links:
+        +tags:
+          - 'link'
+      sats:
+        +tags:
+          - 'satellite'
+      t_links:
+        +tags:
+          - 't_link'
