@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: samples_data
+    database: TEST_DB ## Variabilize
+    schema: STAGING
+    tables:
+      - name: STG_LOCATION_RAW
+      - name: STG_PRODUCT_RAW
+      - name: STG_SALES_RAW

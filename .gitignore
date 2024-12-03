@@ -1,8 +1,1 @@
 logs/
-*.terraform.*
-terraform/.terraform/
-*terraform.tfstate*
-
-*.terraform.*
-*.tfstate
-*.tfstate.*
