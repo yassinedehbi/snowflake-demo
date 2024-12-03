@@ -1,0 +1,13 @@
+[0m10:19:16  Running with dbt=1.8.9
+[0m10:19:16  Registered adapter: snowflake=1.8.4
+[0m10:19:16  Found 6 models, 3 sources, 818 macros
+[0m10:21:29  Running with dbt=1.8.9
+[0m10:21:30  Registered adapter: snowflake=1.8.4
+[0m10:21:30  Encountered an error:
+Compilation Error
+  Encountered unknown tag 'return'. Jinja was looking for the following tags: 'endmacro'. The innermost block that needs to be closed is 'macro'.
+    line 11
+      {% return(all_columns) %}
+[0m10:22:03  Running with dbt=1.8.9
+[0m10:22:03  Registered adapter: snowflake=1.8.4
+[0m10:22:04  Found 7 models, 3 sources, 818 macros
