@@ -143,7 +143,27 @@ jobs:
           python --version
           echo "Step 1: Installing dbt and sqlfluff"
           pip install dbt-core dbt-snowflake sqlfluff sqlfluff-templater-dbt
-
+    
+      - name: Create dbt profiles.yml
+        run: |
+          echo "Step 2: Creating dbt profiles.yml"
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOL
+          dbt_vault_v2:
+            target: dev
+            outputs:
+              dev:
+                type: snowflake
+                account: ${{ secrets.SF_ACCOUNT }}
+                user: ${{ secrets.SF_USERNAME }}
+                password: ${{ secrets.SF_USERNAME }}
+                role: TEST_ROLE
+                database: TEST_DB
+                warehouse: TEST_WH
+                schema: DBT_VAULT
+                threads: 4
+                client_session_keep_alive: False
+          EOL
       - name: Run sqlfluff lint
         run: |
           echo "Step 2: Running sqlfluff lint"
