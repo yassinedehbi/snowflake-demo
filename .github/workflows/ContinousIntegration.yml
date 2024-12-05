@@ -164,6 +164,12 @@ jobs:
                 threads: 4
                 client_session_keep_alive: False
           EOL
+
+      - name: Install dbt dependencies
+        run: |
+          echo "Step 3: Installing dbt dependencies"
+          dbt deps
+
       - name: Run sqlfluff lint
         run: |
           echo "Step 2: Running sqlfluff lint"
