@@ -156,7 +156,7 @@ jobs:
                 type: snowflake
                 account: ${{ secrets.SF_ACCOUNT }}
                 user: ${{ secrets.SF_USERNAME }}
-                password: ${{ secrets.SF_USERNAME }}
+                password: ${{ secrets.SF_PASSWORD }}
                 role: TEST_ROLE
                 database: TEST_DB
                 warehouse: TEST_WH
