@@ -54,6 +54,8 @@ models:
       sats:
         +tags:
           - 'satellite'
-      t_links:
-        +tags:
-          - 't_link'
+    marts:
+      +schema: data_mart
+      +materialized: table
+      +tags:
+        - 'marts'

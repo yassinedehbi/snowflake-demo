@@ -1,0 +1,12 @@
+[sqlfluff]
+
+templater = dbt
+
+dialect = snowflake     
+
+<!-- exclude_rules = LT12  -->
+
+[sqlfluff:templater:dbt]
+profile = dbt_vault_v2  
+
+project_dir = .          
