@@ -1,28 +1,30 @@
 WITH product_hub_sat AS (
     SELECT
-        h.sku_id,
-        s.*
-    FROM {{ ref("hub_product") }} h
-    INNER JOIN {{ ref("sat_product") }} s
-    ON h.product_hk = s.product_hk
+        s.*,
+        h.sku_id
+    FROM {{ ref('hub_product') }} AS h
+    INNER JOIN {{ ref("sat_product") }} AS s
+        ON h.product_hk = s.product_hk
     QUALIFY lead(s.load_date) OVER (
         PARTITION BY h.product_hk
         ORDER BY s.load_date
     ) IS NULL
 ),
+
 star_product AS (
     SELECT
-        SKU_ID,
-        LOAD_DATE,
-        CLASS_ID,
-        COLOR_ID,
-        CURR_STATUS_ID,
-        FUNCTION_ID,
-        LINE_ID,
-        MODEL_ID,
-        STYLE_COLOR_ID,
-        STYLE_ID
+        sku_id,
+        load_date,
+        class_id,
+        color_id,
+        curr_status_id,
+        function_id,
+        line_id,
+        model_id,
+        style_color_id,
+        style_id
     FROM product_hub_sat
 )
-SELECT * 
+
+SELECT *
 FROM star_product

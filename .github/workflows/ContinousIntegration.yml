@@ -120,3 +120,57 @@ jobs:
           echo $SF_ACCOUNT
           echo "Step PR: Running schemachange DRY RUN"
           schemachange -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB --vars '{"warehouse": "TEST_WH"}' -c TEST_DB.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table --dry-run       
+
+ ######################################################################################################
+  dbt-ci-sqlfluff:
+    runs-on: ubuntu-latest
+    needs: snowflake-terraform-plan
+    defaults:
+        run:
+            working-directory: dbt_vault_v2
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Use Python 3.8.x
+        uses: actions/setup-python@v2.2.1
+        with:
+          python-version: 3.8.x
+
+      - name: Install dependencies
+        run: |
+          python --version
+          echo "Step 1: Installing dbt and sqlfluff"
+          pip install dbt-core dbt-snowflake sqlfluff sqlfluff-templater-dbt
+    
+      - name: Create dbt profiles.yml
+        run: |
+          echo "Step 2: Creating dbt profiles.yml"
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOL
+          dbt_vault_v2:
+            target: dev
+            outputs:
+              dev:
+                type: snowflake
+                account: ${{ secrets.SF_ACCOUNT }}
+                user: ${{ secrets.SF_USERNAME }}
+                password: ${{ secrets.SF_PASSWORD }}
+                role: TEST_ROLE
+                database: TEST_DB
+                warehouse: TEST_WH
+                schema: DBT_VAULT
+                threads: 4
+                client_session_keep_alive: False
+          EOL
+
+      - name: Install dbt dependencies
+        run: |
+          echo "Step 3: Installing dbt dependencies"
+          dbt deps
+
+      - name: Run sqlfluff lint
+        run: |
+          echo "Step 2: Running sqlfluff lint"
+          sqlfluff lint models/
