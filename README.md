@@ -9,6 +9,10 @@
 
 ---
 
+## Use Case V2 - Snowflake XX dbt
+**Architecture technique globale**:  
+![Architecture](img/architecture.excalidraw.png)
+
 ## Étape 0 : Les pré-requis d'installation
 1. Installer **VS Code** en local  
 2. Installer **Python** en local  
