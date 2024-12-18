@@ -1,0 +1,1 @@
+select distinct * from DBT_DB.STAGING.STG_LOCATION_RAW

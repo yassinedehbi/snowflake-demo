@@ -1,0 +1,1 @@
+select * from DBT_DB.STAGING.STG_PRODUCT_RAW
