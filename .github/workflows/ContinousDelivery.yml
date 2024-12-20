@@ -100,8 +100,8 @@ jobs:
         run: |
           echo "Running schemachange TO EXEC"
           if [[ "${{ github.ref }}" == "refs/heads/main" && ${{ github.event_name }} == 'push' ]]; then
-            schemachange -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB --vars '{"warehouse": "TEST_WH"}' -c TEST_DB.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+            schemachange deploy -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r TEST_ROLE -w TEST_WH -d TEST_DB --vars '{"warehouse": "TEST_WH"}' -c TEST_DB.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
           else
-            schemachange -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r "${{ github.event.inputs.ENVIRONMENT }}"_ROLE -w "${{ github.event.inputs.ENVIRONMENT }}"_WH -d "${{ github.event.inputs.ENVIRONMENT }}"_DB --vars '{"warehouse": "${{ github.event.inputs.ENVIRONMENT }}_WH"}' -c "${{ github.event.inputs.ENVIRONMENT }}_DB".SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+            schemachange deploy -f . -a ${{ secrets.SF_ACCOUNT }} -u  ${{ secrets.SF_USERNAME }} -r "${{ github.event.inputs.ENVIRONMENT }}"_ROLE -w "${{ github.event.inputs.ENVIRONMENT }}"_WH -d "${{ github.event.inputs.ENVIRONMENT }}"_DB --vars '{"warehouse": "${{ github.event.inputs.ENVIRONMENT }}_WH"}' -c "${{ github.event.inputs.ENVIRONMENT }}_DB".SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
           fi
 
