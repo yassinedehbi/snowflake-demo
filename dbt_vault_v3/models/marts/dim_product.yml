@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: dim_product
+    description: "This dimension table contains information about the products sold by the company."
+    columns:
+      - name: sku_id
+        tests:
+          - unique
+          - not_null
+          

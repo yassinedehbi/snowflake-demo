@@ -28,13 +28,16 @@ select
     ss.subpartition_key,
     ss.ticket_code,
     ss.ticket_line_code,
-    ss.location_id,
+    hl.location_id,
+    sl.location_code,
     ss.location_original_id,
     ss.business_date,
     ss.register_code,
     ss.transaction_time,
     ss.transaction_type_id,
-    ss.transaction_type_code
+    ss.transaction_type_code,
+    hp.sku_id,
+    sp.material_code
 from {{ ref('hub_sales') }} as hs
 left join selected_sat_sales as ss on hs.sales_hk = ss.sales_hk
 left join {{ ref('link_location_sales') }} as lls on hs.sales_hk = lls.sales_hk

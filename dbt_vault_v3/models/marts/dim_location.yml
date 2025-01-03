@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: dim_location
+    description: "This dimension table contains information about the locations where the company operates."
+    columns:
+      - name: location_id
+        tests:
+          - unique
+          - not_null
