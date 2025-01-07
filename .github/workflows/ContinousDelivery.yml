@@ -91,7 +91,7 @@ jobs:
           echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
           python --version
           echo "Step 1: Installing schemachange"
-          pip install schemachange
+          pip install schemachange==3.7.0
 
       - name: EXECUTE schemachange for MERGE or MANUAL EXEC
         env:
