@@ -2,9 +2,48 @@ version: 2
 
 models:
   - name: dim_location
-    description: "This dimension table contains information about the locations where the company operates."
+    description: "This dimension table contains information 
+                  about the locations where the company operates."
     columns:
       - name: location_id
+        data_type: varchar
         tests:
           - unique
           - not_null
+        description: ""
+
+      - name: location_code
+        data_type: varchar
+        description: ""
+
+      - name: city_id
+        data_type: number
+        description: ""
+
+      - name: state_id
+        data_type: varchar
+        description: ""
+
+      - name: country_id
+        data_type: varchar
+        description: ""
+
+      - name: district_id
+        data_type: varchar
+        description: ""
+
+      - name: zone_id
+        data_type: varchar
+        description: ""
+
+      - name: region_id
+        data_type: varchar
+        description: ""
+
+      - name: area_id
+        data_type: number
+        description: ""
+      
+
+
+

@@ -14,7 +14,6 @@ WITH product_hub_sat AS (
 star_product AS (
     SELECT
         sku_id,
-        load_date,
         class_id,
         color_id,
         curr_status_id,

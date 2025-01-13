@@ -7,8 +7,9 @@ derived_columns:
   LOAD_DATE: 'LDTS'
 --   EFFECTIVE_FROM: 'TRANSACTION_DATE'
 hashed_columns:
-    SALES_HK: 'TRANSACTION_SALES'
-
+    SALES_HK: 
+      - 'LOCATION_ID'
+      - 'SKU_ID'
     LOCATION_HK: 'LOCATION_ID'
     PRODUCT_HK: 'SKU_ID'
 
@@ -16,6 +17,11 @@ hashed_columns:
         is_hashdiff: true
         columns:
             - 'AMT_TAX'
+            - 'AMT_DISCOUNT'
+            - 'AUDIT_TYPE_CODE'
+            - 'AUDIT_TYPE_ID'
+            - 'CURRENCY_ID'
+            - 'CUSTOMER_CODE'
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

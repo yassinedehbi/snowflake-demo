@@ -26,7 +26,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 # Configuring models
 models:
   dbt_vault_v3:
-    +schema: V3
+    +schema: DBT_VAULT_V3
     # query-comment: "{{ query_comment() }}"  # Add a comment to the model query
     +persist_docs:
       relation: true
@@ -55,7 +55,7 @@ models:
         +tags:
           - 'satellite'
     marts:
-      +schema: data_mart_v3
+      +schema: DATA_MART_V3
       +materialized: table
       +tags:
         - 'marts'

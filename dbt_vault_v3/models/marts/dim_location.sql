@@ -14,7 +14,6 @@ WITH location_hub_sat AS (
 star_location AS (
     SELECT
         location_hub_sat.location_id,
-        location_hub_sat.load_date,
         location_hub_sat.location_code,
         location_hub_sat.city_id,
         location_hub_sat.state_id,
