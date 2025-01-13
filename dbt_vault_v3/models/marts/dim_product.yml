@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: dim_product
+    description: "This dimension table contains information about the products sold by the company."
+    columns:
+      - name: sku_id
+        tests:
+          - unique
+          - not_null
+        description: ""
+
+      - name: class_id
+        data_type: number
+        description: ""
+
+      - name: color_id
+        data_type: number
+        description: ""
+
+      - name: curr_status_id
+        data_type: number
+        description: ""
+
+      - name: function_id
+        data_type: number
+        description: ""
+
+      - name: line_id
+        data_type: number
+        description: ""
+
+      - name: model_id
+        data_type: number
+        description: ""
+
+      - name: style_color_id
+        data_type: number
+        description: ""
+
+      - name: style_id
+        data_type: number
+        description: ""

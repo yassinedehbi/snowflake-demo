@@ -1,7 +1,7 @@
-{%- set source_model = "v_stg_sales" -%}
-{%- set src_pk = "SALES_HK" -%}
-{%- set src_hashdiff = "SALES_HASHDIFF" -%}
-{%- set src_payload =  get_filtered_columns(ref('raw_sales'), except=['TRANSACTION_SALES', 'SKU_ID', 'LOCATION_ID', 'LDTS', 'SOURCE_FILE']) -%}
+{%- set source_model = "v_stg_location" -%}
+{%- set src_pk = "LOCATION_HK" -%}
+{%- set src_hashdiff = "LOCATION_HASHDIFF" -%}
+{%- set src_payload =  get_filtered_columns(ref('raw_location'), except=['LOCATION_ID', 'LDTS', 'SOURCE_FILE']) -%}
 {%- set src_ldts = "LOAD_DATE" -%}
 {%- set src_source = "RECORD_SOURCE" -%}
 
