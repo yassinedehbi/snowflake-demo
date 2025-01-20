@@ -2,7 +2,10 @@ with selected_sat_sales as (
     select *
     from {{ ref('sat_sales') }} qualify
         lead(load_date)
-            over (partition by sales_hk order by load_date asc)
+            over (
+                partition by sales_hk
+                order by load_date asc
+            )
         is null
 ),
 
@@ -10,7 +13,10 @@ selected_sat_location as (
     select *
     from {{ ref('sat_location') }} qualify
         lead(load_date)
-            over (partition by location_hk order by load_date asc)
+            over (
+                partition by location_hk
+                order by load_date asc
+            )
         is null
 ),
 
@@ -18,7 +24,10 @@ selected_sat_product as (
     select *
     from {{ ref('sat_product') }} qualify
         lead(load_date)
-            over (partition by product_hk order by load_date asc)
+            over (
+                partition by product_hk
+                order by load_date asc
+            )
         is null
 )
 
