@@ -1,7 +1,16 @@
 WITH location_hub_sat AS (
     SELECT
-        s.*,
-        h.location_id
+        s.load_date,
+        s.location_code,
+        s.city_id,
+        s.state_id,
+        s.country_id,
+        s.district_id,
+        s.zone_id,
+        s.region_id,
+        s.area_id,
+        h.location_id,
+        h.location_hk
     FROM {{ ref("hub_location") }} AS h
     INNER JOIN {{ ref("sat_location") }} AS s
         ON h.location_hk = s.location_hk
@@ -14,6 +23,7 @@ WITH location_hub_sat AS (
 star_location AS (
     SELECT
         location_hub_sat.location_id,
+        location_hub_sat.location_hk,
         location_hub_sat.location_code,
         location_hub_sat.city_id,
         location_hub_sat.state_id,

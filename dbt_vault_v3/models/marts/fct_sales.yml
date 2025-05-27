@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: fct_sales
+    description: "This fact table combines data from the sales, location, and product satellite tables to provide a comprehensive view of sales transactions."
+    columns:
+      - name: f_sales_hk
+        tests:
+          - unique
+          - not_null
+     

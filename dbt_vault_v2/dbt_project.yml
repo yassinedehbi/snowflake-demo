@@ -29,6 +29,10 @@ models:
   dbt_project_evaluator:
     +database: REF_DB
   dbt_vault_v2:
+    +schema: DBT_VAULT_V2
+    +persist_docs:
+      relation: true
+      columns: true
     # Config indicated by + and applies to all files under models/example/
     raw_stage:
       +materialized: view
@@ -53,7 +57,7 @@ models:
         +tags:
           - 'satellite'
     marts:
-      +schema: data_mart
+      +schema: DATA_MART_V2
       +materialized: table
       +tags:
         - 'marts'

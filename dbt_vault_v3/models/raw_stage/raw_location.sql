@@ -1,1 +1,1 @@
-select distinct * from {{ source('samples_data', 'STG_LOCATION_RAW') }}
+select distinct * from {{ source('staging', 'STG_LOCATION_RAW') }}

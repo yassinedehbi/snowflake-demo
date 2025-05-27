@@ -1,1 +1,1 @@
-select * from {{ source('samples_data', 'STG_SALES_RAW') }}
+select * from {{ source('staging', 'STG_SALES_RAW') }}

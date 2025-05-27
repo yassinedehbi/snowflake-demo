@@ -1,7 +1,7 @@
 version: 2
 
 sources:
-  - name: samples_data
+  - name: staging
     database: "{{ target.database }}" ## Variabilize - DONE :)
     schema: STAGING
     tables:

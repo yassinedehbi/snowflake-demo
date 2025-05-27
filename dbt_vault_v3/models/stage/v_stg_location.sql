@@ -21,6 +21,7 @@ hashed_columns:
             - 'ZONE_ID'
             - 'REGION_ID'
             - 'AREA_ID'
+            - 'STORE_GROUP_CODE'
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
